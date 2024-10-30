@@ -1,3 +1,10 @@
+# github地址 https://github.com/Ji11/UDPProgramForHomework
+
+# 运行环境：
+# Python 3.11.4
+# Server: Vmware Workstation 17 Pro, Ubuntu 20.04 LTS
+# Client: Windows 11 Home 23H2
+
 #UDPClient.py
 import socket as sk
 import argparse
