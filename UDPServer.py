@@ -5,6 +5,12 @@
 # Server: Vmware Workstation 17 Pro, Ubuntu 20.04 LTS
 # Client: Windows 11 Home 23H2
 
+# 使用方法：
+# 命令行运行：python UDPServer.py server_ip server_port
+# 支持的文件传输格式：文本文件、二进制文件、压缩包等
+
+# 已包含了UDP对TCP连接建立、释放的模拟实现，但只简单使用了一个ACK来进行连接建立
+
 #UDPServer.py
 import socket as sk
 import argparse
@@ -44,7 +50,10 @@ def UDPServer(host, port, buffer_size=32768):
                     f.write(data)
                     received_size += len(data)
                     print(f"Receiving {received_size}/{file_size} bytes...")
-            
+                    
+                    # 每接收一个分组发送ACK
+                    server_socket.sendto("ACK".encode(), client_addr)
+
             print(f"File {file_name} received successfully from {client_addr}")
 
             # 关闭连接

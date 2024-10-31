@@ -5,14 +5,23 @@
 # Server: Vmware Workstation 17 Pro, Ubuntu 20.04 LTS
 # Client: Windows 11 Home 23H2
 
+# 使用方法：
+# 命令行运行：python UDPClient.py server_ip server_port filepath
+# 支持的文件传输格式：文本文件、二进制文件、压缩包等
+
+# 已包含了UDP对TCP连接建立、释放的模拟实现
+
 #UDPClient.py
 import socket as sk
 import argparse
+import time 
+# 用于延迟执行
 import os
 # os提供了与操作系统交互的接口，用于文件操作、执行系统命令等
 
-def UDPClient(server_ip, server_port, filepath, buffer_size=32768):
+def UDPClient(server_ip, server_port, filepath, buffer_size=32768, delay=0.01):
     client_socket = sk.socket(sk.AF_INET, sk.SOCK_DGRAM)
+    ack_count = 0  # 初始化ACK计数器
 
     client_socket.sendto("CONNECT".encode(), (server_ip, server_port))
     data, server_addr = client_socket.recvfrom(buffer_size)
@@ -39,8 +48,22 @@ def UDPClient(server_ip, server_port, filepath, buffer_size=32768):
             client_socket.sendto(data, (server_ip, server_port))
             sent_size += len(data)
             print(f"Sending {sent_size}/{file_size} bytes...")
+            # time.sleep(delay)
+            # 延迟执行，已经发现过快的client端传输，而server端接受速度不匹配导致丢包
+            # 上网查询得到此种解决方法，在发送数据前加入延迟，使得server端有足够的时间来接受数据
+
+            # 等待服务器确认
+            ack, server_addr = client_socket.recvfrom(buffer_size)
+            if ack.decode() != "ACK":
+                print("Failed to receive ACK, resending packet...")
+                client_socket.sendto(data, (server_ip, server_port))  # 重发数据包
+            else:
+                ack_count += 1  # 增加ACK计数
+                print(f"ACK #{ack_count} received, sending next packet.")
+
 
     print(f"File {file_name} sent successfully to {server_ip}:{server_port}")
+    print(f"Total ACKs received: {ack_count}")
 
     # 连接释放
     data, server_addr = client_socket.recvfrom(buffer_size)
