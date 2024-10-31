@@ -9,7 +9,7 @@
 # 命令行运行：python UDPServer.py server_ip server_port
 # 支持的文件传输格式：文本文件、二进制文件、压缩包等
 
-# 已包含了UDP对TCP连接建立、释放的模拟实现，但只简单使用了一个ACK来进行连接建立
+# 已包含了UDP对TCP连接建立、释放的模拟实现，每个分组发送前都会进行ACK确认，避免丢包
 
 #UDPServer.py
 import socket as sk
